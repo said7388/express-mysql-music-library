@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import { verificationForAuthenticuser } from './middleware/auth';
+import albumRouter from './routes/album.route';
 import artistRouter from './routes/artist.route';
 import authRouter from './routes/auth.route';
 require('dotenv').config();
@@ -18,6 +19,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/artists', verificationForAuthenticuser, artistRouter);
+app.use('/api/albums', verificationForAuthenticuser, albumRouter);
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next) => {
