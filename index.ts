@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser';
 import express, { Application, NextFunction, Request, Response } from 'express';
 import authRouter from './routes/auth.route';
+require('dotenv').config();
 
 const app: Application = express();
 const port = process.env.PORT || 4000;

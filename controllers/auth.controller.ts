@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import database from "../config/db.config";
+import { database } from "../config/db.config";
+import { User } from '../model/user.model';
 
 /**
  * ROUTE: /api/auth/sign-up
@@ -23,28 +24,19 @@ export const userSignUp = async (req: Request, res: Response) => {
     });
   };
 
+  const connection = await database();
+
   try {
     const insertQuery = `INSERT INTO Users (name, email, password, address) VALUES (?, ?, ?, ?);`;
     const getQuery = `SELECT *, NULL AS password FROM Users WHERE id= LAST_INSERT_ID();`;
 
-    database.query(insertQuery, [name, email, hashedPassword, address], (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: err.message,
-        });
-      };
-    })
+    await connection.query(insertQuery, [name, email, hashedPassword, address]);
 
-    database.query(getQuery, (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          message: err.message,
-        });
-      };
+    const [users] = await connection.query<User[]>(getQuery);
 
+    if (users.length > 0) {
       const token = jwt.sign(
-        { id: result[0]?.id, email: result[0]?.email },
+        { id: users[0].id, email: users[0].email },
         process.env.JWT_SECRTE as string,
         { expiresIn: "24h" }
       );
@@ -52,10 +44,11 @@ export const userSignUp = async (req: Request, res: Response) => {
       return res.status(201).json({
         success: true,
         message: "User registration successfully!",
-        user: result[0],
+        user: users[0],
         token: token
       });
-    });
+    }
+
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -71,45 +64,38 @@ export const userSignUp = async (req: Request, res: Response) => {
  */
 export const userLogin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
+  const connection = await database();
   const sqlQuery = `SELECT * FROM Users WHERE email = ?;`;
 
   try {
-    database.query(sqlQuery, [email], (err, result) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: err.message,
-        });
-      };
+    const [users] = await connection.query<User[]>(sqlQuery, [email]);
 
-      if (result.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "User not found!",
-        });
-      };
-
-      const isPasswordValid = bcrypt.compareSync(password, result[0].password);
-
-      if (!isPasswordValid) {
-        return res.status(401).json({
-          success: false,
-          message: "Invalid password!",
-        });
-      };
-
-      const token = jwt.sign(
-        { id: result[0].id, email: result[0].email },
-        process.env.JWT_SECRTE as string,
-        { expiresIn: "24h" }
-      );
-
-      return res.status(200).json({
-        success: true,
-        message: "User login successfully!",
-        token: token
+    if (users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found!",
       });
+    };
+
+    const isPasswordValid = bcrypt.compareSync(password, users[0].password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid password!",
+      });
+    };
+
+    const token = jwt.sign(
+      { id: users[0].id, email: users[0].email },
+      process.env.JWT_SECRTE as string,
+      { expiresIn: "24h" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "User login successfully!",
+      token: token
     });
   } catch (error) {
     return res.status(500).json({

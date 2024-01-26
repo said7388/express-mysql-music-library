@@ -1,22 +1,14 @@
-import mysql from 'mysql';
-require('dotenv').config();
+import { createPool } from 'mysql2/promise';
 
-// Create mySQL Connection Pool
-const database = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT as unknown as number || 3306,
-});
+export async function database() {
+    const connection = createPool({
+        connectionLimit: 10,
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASS,
+        database: process.env.DB_NAME,
+    });
 
-database.connect(function (err: Error) {
-    if (err) {
-        console.error('error connecting: ' + err);
-        return;
-    }
+    return connection;
+}
 
-    console.log('database connection established');
-});
-
-export default database;
