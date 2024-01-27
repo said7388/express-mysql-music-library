@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { database } from "../config/db.config";
 import { User } from '../model/user.model';
+import { loginSchema } from '../schema';
 
 /**
  * ROUTE: /api/auth/sign-up
@@ -62,13 +63,14 @@ export const userSignUp = async (req: Request, res: Response) => {
  */
 export const userLogin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  const { error } = loginSchema.validate(req.body);
 
-  if (!email || !password) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Email and password are required!"
-    });
-  };
+      message: error.message,
+    })
+  }
 
   try {
     const connection = await database();

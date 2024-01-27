@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { database } from "../config/db.config";
 import { Album } from "../model/album.model";
+import { albumSchema } from "../schema";
 
 /**
  * ROUTE: /api/albums
@@ -93,13 +94,14 @@ export const getAlbumById = async (req: Request, res: Response) => {
  */
 export const addNewAlbum = async (req: Request, res: Response) => {
   const { title, release_year, genre, artists } = req.body;
+  const { error } = albumSchema.validate(req.body);
 
-  if (!title || !release_year || !genre) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Title, release_year and genre are required!"
-    });
-  }
+      message: error.message,
+    })
+  };
 
   try {
     const connection = await database();
@@ -136,12 +138,13 @@ export const addNewAlbum = async (req: Request, res: Response) => {
  */
 export const updateAlbum = async (req: Request, res: Response) => {
   const { title, release_year, genre } = req.body;
+  const { error } = albumSchema.validate(req.body);
 
-  if (!title || !release_year || !genre) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Title, release_year and genre are required!"
-    });
+      message: error.message,
+    })
   };
 
   try {

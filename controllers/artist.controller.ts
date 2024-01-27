@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { database } from "../config/db.config";
 import { Artist } from "../model/artist.model";
+import { artistSchema } from "../schema";
 
 /**
  * ROUTE: /api/artists
@@ -93,12 +94,13 @@ export const getArtistById = async (req: Request, res: Response) => {
  */
 export const addNewArtist = async (req: Request, res: Response) => {
   const { name, country, albums } = req.body;
+  const { error } = artistSchema.validate(req.body);
 
-  if (!name || !country) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Name and country are required!"
-    });
+      message: error.message,
+    })
   };
 
   try {
@@ -135,12 +137,13 @@ export const addNewArtist = async (req: Request, res: Response) => {
  */
 export const updateArtist = async (req: Request, res: Response) => {
   const { name, country } = req.body;
+  const { error } = artistSchema.validate(req.body);
 
-  if (!name || !country) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Name and country are required!"
-    });
+      message: error.message,
+    })
   };
 
   try {

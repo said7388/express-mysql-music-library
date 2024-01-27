@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { database } from "../config/db.config";
 import { User } from "../model/user.model";
+import { userSchema } from "../schema";
 
 export const verifyAuthenticUser = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["authorization"];
@@ -28,13 +29,15 @@ export const verifyAuthenticUser = (req: Request, res: Response, next: NextFunct
 }
 
 export const validateInput = async (req: Request, res: Response, next: NextFunction) => {
-  const { name, email, password } = req.body;
+  const { email } = req.body;
+  const { error } = userSchema.validate(req.body);
 
-  if (!name || !email || !password) {
+  if (error) {
     return res.status(400).json({
-      message: "Name, email and password are required!",
-    });
-  };
+      success: false,
+      message: error.message,
+    })
+  }
 
   const sqlQuery = `SELECT * FROM Users WHERE email = '${email}';`;
   const connection = await database();

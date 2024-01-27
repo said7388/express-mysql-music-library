@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { database } from "../config/db.config";
 import { Song } from "../model/song.model";
+import { songSchema } from "../schema";
 
 /**
  * ROUTE: /api/songs
@@ -94,12 +95,13 @@ export const getSongById = async (req: Request, res: Response) => {
  */
 export const addNewSong = async (req: Request, res: Response) => {
   const { title, duration, album } = req.body;
+  const { error } = songSchema.validate(req.body);
 
-  if (!title || !duration || !album) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Title, duration and album are required!"
-    });
+      message: error.message,
+    })
   };
 
   try {
@@ -128,12 +130,13 @@ export const addNewSong = async (req: Request, res: Response) => {
 export const updateSong = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { title, duration, album } = req.body;
+  const { error } = songSchema.validate(req.body);
 
-  if (!title || !duration || !album) {
+  if (error) {
     return res.status(400).json({
       success: false,
-      message: "Title, duration and album are required!"
-    });
+      message: error.message,
+    })
   };
 
   try {
