@@ -27,6 +27,35 @@ export const getAllAlbum = async (req: Request, res: Response) => {
 };
 
 /**
+ * ROUTE: /api/albums/artist/:id
+ * METHOD: GET
+ * DESC: Get all albums by artist id
+ */
+export const getAlbumsByArtist = async (req: Request, res: Response) => {
+  const connection = await database();
+  const sqlQuery = `
+    SELECT a.*
+    FROM Albums a
+    INNER JOIN albums_artists aa ON a.id = aa.album
+    WHERE aa.artist = ?;
+  `;
+
+  try {
+    const [albums] = await connection.query<Album[]>(sqlQuery, [req.params.id]);
+
+    return res.status(200).json({
+      success: true,
+      albums: albums
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong!"
+    });
+  };
+};
+
+/**
  * ROUTE: /api/albums/:id
  * METHOD: GET
  * DESC: Retrive a single album by id

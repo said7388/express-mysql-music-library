@@ -34,6 +34,7 @@ export const getAllSong = async (req: Request, res: Response) => {
 export const getSongsForAlbum = async (req: Request, res: Response) => {
   const connection = await database();
   const { id } = req.params;
+
   const sqlQuery = `
             SELECT s.id, s.title, s.duration, s.title as album_name
             FROM Songs s
