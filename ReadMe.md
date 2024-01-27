@@ -43,4 +43,4 @@ npm run server
 
 ## API Documentation
 
-You will find postman API documentation in this link: [Click here.](https://documenter.getpostman.com/view/19954195/2s9YyqiMvy#e301be57-8190-487e-890f-ebc51093bb6b)
+You will find postman API documentation in this link: [Click here.](https://documenter.getpostman.com/view/19954195/2s9YyqiMvy)
