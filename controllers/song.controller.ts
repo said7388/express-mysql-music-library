@@ -92,11 +92,19 @@ export const getSongById = async (req: Request, res: Response) => {
  * DESC: Add a new song
  */
 export const addNewSong = async (req: Request, res: Response) => {
-  const connection = await database();
   const { title, duration, album } = req.body;
-  const sqlQuery = `INSERT INTO Songs (title, duration, album) VALUES (?, ?, ?)`;
+
+  if (!title || !duration || !album) {
+    return res.status(400).json({
+      success: false,
+      message: "Title, duration and album are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `INSERT INTO Songs (title, duration, album) VALUES (?, ?, ?)`;
+
     await connection.query<Song[]>(sqlQuery, [title, duration, album]);
 
     return res.status(200).json({
@@ -117,12 +125,20 @@ export const addNewSong = async (req: Request, res: Response) => {
  * DESC: Update a song
  */
 export const updateSong = async (req: Request, res: Response) => {
-  const connection = await database();
   const { id } = req.params;
   const { title, duration, album } = req.body;
-  const sqlQuery = `UPDATE Songs SET title = ?, duration = ?, album = ? WHERE id = ?`;
+
+  if (!title || !duration || !album) {
+    return res.status(400).json({
+      success: false,
+      message: "Title, duration and album are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `UPDATE Songs SET title = ?, duration = ?, album = ? WHERE id = ?`;
+
     await connection.query<Song[]>(sqlQuery, [title, duration, album, id]);
 
     return res.status(200).json({

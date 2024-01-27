@@ -64,11 +64,19 @@ export const getAlbumById = async (req: Request, res: Response) => {
  */
 export const addNewAlbum = async (req: Request, res: Response) => {
   const { title, release_year, genre, artists } = req.body;
-  const connection = await database();
-  const sqlQuery = `INSERT INTO Albums (title, release_year, genre) VALUES (?, ?, ?)`;
-  const getQuery = `SELECT * FROM Albums WHERE id= LAST_INSERT_ID();`;
+
+  if (!title || !release_year || !genre) {
+    return res.status(400).json({
+      success: false,
+      message: "Title, release_year and genre are required!"
+    });
+  }
 
   try {
+    const connection = await database();
+    const sqlQuery = `INSERT INTO Albums (title, release_year, genre) VALUES (?, ?, ?)`;
+    const getQuery = `SELECT * FROM Albums WHERE id= LAST_INSERT_ID();`;
+
     await connection.query(sqlQuery, [title, release_year, genre]);
     const [albums] = await connection.query<Album[]>(getQuery);
 
@@ -99,10 +107,18 @@ export const addNewAlbum = async (req: Request, res: Response) => {
  */
 export const updateAlbum = async (req: Request, res: Response) => {
   const { title, release_year, genre } = req.body;
-  const connection = await database();
-  const sqlQuery = `UPDATE Albums SET title = ?, release_year = ?, genre = ? WHERE id = ?`;
+
+  if (!title || !release_year || !genre) {
+    return res.status(400).json({
+      success: false,
+      message: "Title, release_year and genre are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `UPDATE Albums SET title = ?, release_year = ?, genre = ? WHERE id = ?`;
+
     await connection.query(sqlQuery, [title, release_year, genre, req.params.id]);
 
     return res.status(200).json({

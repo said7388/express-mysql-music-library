@@ -12,9 +12,15 @@ import { User } from '../model/user.model';
 export const userSignUp = async (req: Request, res: Response) => {
   const { name, email, password, address } = req.body;
 
+  if (!name || !email || !password || !address) {
+    return res.status(400).json({
+      success: false,
+      message: "Name, email, password and address are required!"
+    });
+  };
+
   // Secure password
   let hashedPassword;
-
   try {
     hashedPassword = await bcrypt.hash(password, 10);
   } catch (error) {
@@ -24,9 +30,8 @@ export const userSignUp = async (req: Request, res: Response) => {
     });
   };
 
-  const connection = await database();
-
   try {
+    const connection = await database();
     const insertQuery = `INSERT INTO Users (name, email, password, address) VALUES (?, ?, ?, ?);`;
     const getQuery = `SELECT *, NULL AS password FROM Users WHERE id= LAST_INSERT_ID();`;
 
@@ -64,10 +69,17 @@ export const userSignUp = async (req: Request, res: Response) => {
  */
 export const userLogin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  const connection = await database();
-  const sqlQuery = `SELECT * FROM Users WHERE email = ?;`;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `SELECT * FROM Users WHERE email = ?;`;
     const [users] = await connection.query<User[]>(sqlQuery, [email]);
 
     if (users.length === 0) {

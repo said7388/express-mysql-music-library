@@ -64,11 +64,19 @@ export const getArtistById = async (req: Request, res: Response) => {
  */
 export const addNewArtist = async (req: Request, res: Response) => {
   const { name, country, albums } = req.body;
-  const connection = await database();
-  const sqlQuery = `INSERT INTO Artists (name, country) VALUES (?, ?)`;
-  const getQuery = `SELECT * FROM Artists WHERE id= LAST_INSERT_ID();`;
+
+  if (!name || !country) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and country are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `INSERT INTO Artists (name, country) VALUES (?, ?)`;
+    const getQuery = `SELECT * FROM Artists WHERE id= LAST_INSERT_ID();`;
+
     await connection.query(sqlQuery, [name, country]);
     const [artists] = await connection.query<Artist[]>(getQuery);
 
@@ -98,10 +106,18 @@ export const addNewArtist = async (req: Request, res: Response) => {
  */
 export const updateArtist = async (req: Request, res: Response) => {
   const { name, country } = req.body;
-  const connection = await database();
-  const sqlQuery = `UPDATE Artists SET name = ?, country = ? WHERE id = ?`;
+
+  if (!name || !country) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and country are required!"
+    });
+  };
 
   try {
+    const connection = await database();
+    const sqlQuery = `UPDATE Artists SET name = ?, country = ? WHERE id = ?`;
+
     await connection.query(sqlQuery, [name, country, req.params.id]);
 
     return res.status(200).json({
