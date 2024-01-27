@@ -12,13 +12,6 @@ import { User } from '../model/user.model';
 export const userSignUp = async (req: Request, res: Response) => {
   const { name, email, password, address } = req.body;
 
-  if (!name || !email || !password || !address) {
-    return res.status(400).json({
-      success: false,
-      message: "Name, email, password and address are required!"
-    });
-  };
-
   // Secure password
   let hashedPassword;
   try {
