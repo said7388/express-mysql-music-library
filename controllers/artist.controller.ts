@@ -63,16 +63,25 @@ export const getArtistById = async (req: Request, res: Response) => {
  * DESC: Add a new artist
  */
 export const addNewArtist = async (req: Request, res: Response) => {
-  const { name, country } = req.body;
+  const { name, country, albums } = req.body;
   const connection = await database();
   const sqlQuery = `INSERT INTO Artists (name, country) VALUES (?, ?)`;
+  const getQuery = `SELECT * FROM Artists WHERE id= LAST_INSERT_ID();`;
 
   try {
     await connection.query(sqlQuery, [name, country]);
+    const [artists] = await connection.query<Artist[]>(getQuery);
+
+    if (albums?.length > 0) {
+      const sqlQuery = `INSERT INTO albums_artists (artist, album) VALUES ?`;
+      const values = albums.map((album: number) => [artists[0].id, album]);
+      await connection.query(sqlQuery, [values]);
+    };
 
     return res.status(201).json({
       success: true,
       message: "Artist added successfully!",
+      data: artists[0]
     });
   } catch (error) {
     return res.status(500).json({

@@ -1,9 +1,11 @@
 import bodyParser from 'body-parser';
 import express, { Application, NextFunction, Request, Response } from 'express';
-import { verificationForAuthenticuser } from './middleware/auth';
+import { verifyAuthenticUser } from './middleware/auth';
 import albumRouter from './routes/album.route';
 import artistRouter from './routes/artist.route';
 import authRouter from './routes/auth.route';
+import songRouter from './routes/song.route';
+
 require('dotenv').config();
 
 const app: Application = express();
@@ -18,8 +20,9 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/api/auth', authRouter);
-app.use('/api/artists', verificationForAuthenticuser, artistRouter);
-app.use('/api/albums', verificationForAuthenticuser, albumRouter);
+app.use('/api/artists', verifyAuthenticUser, artistRouter);
+app.use('/api/albums', verifyAuthenticUser, albumRouter);
+app.use('/api/songs', verifyAuthenticUser, songRouter);
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next) => {

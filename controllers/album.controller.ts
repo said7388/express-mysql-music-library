@@ -63,18 +63,28 @@ export const getAlbumById = async (req: Request, res: Response) => {
  * DESC: Add a new album
  */
 export const addNewAlbum = async (req: Request, res: Response) => {
-  const { title, release_year, genre } = req.body;
+  const { title, release_year, genre, artists } = req.body;
   const connection = await database();
   const sqlQuery = `INSERT INTO Albums (title, release_year, genre) VALUES (?, ?, ?)`;
+  const getQuery = `SELECT * FROM Albums WHERE id= LAST_INSERT_ID();`;
 
   try {
     await connection.query(sqlQuery, [title, release_year, genre]);
+    const [albums] = await connection.query<Album[]>(getQuery);
+
+    if (artists?.length > 0) {
+      const sqlQuery = `INSERT INTO albums_artists (album, artist) VALUES ?`;
+      const values = artists.map((artist: number) => [albums[0].id, artist]);
+      await connection.query(sqlQuery, [values]);
+    }
 
     return res.status(201).json({
       success: true,
       message: "Album added successfully!",
+      data: albums[0]
     });
   } catch (error) {
+    console.log(error)
     return res.status(500).json({
       success: false,
       message: "Something went wrong!"

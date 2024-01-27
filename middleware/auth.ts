@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { database } from "../config/db.config";
 import { User } from "../model/user.model";
 
-export const verificationForAuthenticuser = (req: Request, res: Response, next: NextFunction) => {
+export const verifyAuthenticUser = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers["authorization"];
 
   let tokenWithoutBearer = null;
